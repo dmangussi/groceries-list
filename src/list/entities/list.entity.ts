@@ -5,6 +5,6 @@ export class List {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @Column()
+  @Column({ nullable: false, unique: true })
   description: string;
 }
