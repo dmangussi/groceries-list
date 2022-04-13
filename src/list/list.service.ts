@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateListDto } from './dto/create-list.dto';
@@ -12,7 +12,17 @@ export class ListService {
     private listRepository: Repository<List>,
   ) {}
 
-  create(createListDto: CreateListDto) {
+  async create(createListDto: CreateListDto) {
+    const count = await this.listRepository
+      .count({
+        description: createListDto.description,
+      })
+      .then((result) => result);
+
+    if (count > 0) {
+      throw new HttpException('List already exists', HttpStatus.BAD_REQUEST);
+    }
+
     return this.listRepository.save(createListDto);
   }
 
