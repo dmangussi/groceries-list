@@ -13,12 +13,7 @@ export class ListService {
   ) {}
 
   async create(createListDto: CreateListDto) {
-    const count = await this.listRepository
-      .count({
-        description: createListDto.description,
-      })
-      .then((result) => result);
-
+    const count = await this.countByDescription(createListDto.description);
     if (count > 0) {
       throw new HttpException('List already exists', HttpStatus.BAD_REQUEST);
     }
@@ -34,11 +29,24 @@ export class ListService {
     return this.listRepository.findOne(id);
   }
 
-  update(id: string, updateListDto: UpdateListDto) {
+  async update(id: string, updateListDto: UpdateListDto) {
+    const count = await this.countByDescription(updateListDto.description);
+    if (count > 0) {
+      throw new HttpException('List already exists', HttpStatus.BAD_REQUEST);
+    }
+
     return this.listRepository.update(id, updateListDto);
   }
 
   remove(id: string) {
     return this.listRepository.delete(id);
+  }
+
+  private async countByDescription(description: string) {
+    return await this.listRepository
+      .count({
+        description: description,
+      })
+      .then((result) => result);
   }
 }
